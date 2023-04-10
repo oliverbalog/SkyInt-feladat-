@@ -24,6 +24,7 @@ export const userSlice = createSlice({
     },
     addItem: (state, action: PayloadAction<Honey>) => {
         state.items.push(action.payload);
+        console.log(state.items)
     }
   },
 });

@@ -23,6 +23,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import { AddCircleOutline } from '@mui/icons-material';
+import cartSlice, { addItem } from '../../features/cartSlice';
+import { cartStore } from '../../stores/cartStore';
 
 interface Data {
   name: number | string;
@@ -118,14 +120,13 @@ const DEFAULT_ROWS_PER_PAGE = 5;
 interface EnhancedTableProps {
   numSelected: number;
   onRequestSort: (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => void;
-  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
   order: Order;
   orderBy: string;
   rowCount: number;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const { order, orderBy, numSelected, rowCount, onRequestSort } = props;
   const createSortHandler = (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, newOrderBy);
   };
@@ -133,9 +134,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox">
-           
-        </TableCell>
+        <TableCell padding="checkbox"></TableCell>
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
@@ -208,10 +207,10 @@ export default function Honeys() {
   const [orderBy, setOrderBy] = React.useState<keyof Data>(DEFAULT_ORDER_BY);
   const [selected, setSelected] = React.useState<readonly string[]>([]);
   const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
   const [visibleRows, setVisibleRows] = React.useState<Data[] | null>(null);
   const [rowsPerPage, setRowsPerPage] = React.useState(DEFAULT_ROWS_PER_PAGE);
   const [paddingHeight, setPaddingHeight] = React.useState(0);
+  const additem = addItem;
 
   React.useEffect(() => {
     let rowsOnMount = stableSort(rows, getComparator(DEFAULT_ORDER, DEFAULT_ORDER_BY));
@@ -280,10 +279,10 @@ export default function Honeys() {
       // Avoid a layout jump when reaching the last page with empty rows.
       const numEmptyRows = newPage > 0 ? Math.max(0, (1 + newPage) * rowsPerPage - rows.length) : 0;
 
-      const newPaddingHeight = (dense ? 33 : 53) * numEmptyRows;
+      const newPaddingHeight = (53) * numEmptyRows;
       setPaddingHeight(newPaddingHeight);
     },
-    [order, orderBy, dense, rowsPerPage]
+    [order, orderBy, rowsPerPage]
   );
 
   const handleChangeRowsPerPage = React.useCallback(
@@ -306,10 +305,6 @@ export default function Honeys() {
     [order, orderBy]
   );
 
-  const handleChangeDense = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDense(event.target.checked);
-  };
-
   const isSelected = (name: string) => selected.indexOf(name) !== -1;
 
   return (
@@ -320,12 +315,11 @@ export default function Honeys() {
           <Table
             sx={{ minWidth: 750 }}
             aria-labelledby="tableTitle"
-            size={dense ? 'small' : 'medium'}>
+            size={'medium'}>
             <EnhancedTableHead
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
             />
@@ -338,7 +332,6 @@ export default function Honeys() {
                     return (
                       <TableRow
                         hover
-                        onClick={(event) => handleClick(event, row.name.toString())}
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
@@ -346,7 +339,16 @@ export default function Honeys() {
                         selected={isItemSelected}
                         sx={{ cursor: 'pointer' }}>
                         <TableCell padding="checkbox">
+                          <div
+                            onClick={(e) =>
+                              additem({
+                                name: row.name,
+                                price: row.price,
+                                weight: row.weight,
+                              })
+                            }>
                             <AddCircleOutline></AddCircleOutline>
+                          </div>
                         </TableCell>
                         <TableCell component="th" id={labelId} scope="row" padding="none">
                           {row.name}
@@ -378,10 +380,6 @@ export default function Honeys() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-      <FormControlLabel
-        control={<Switch checked={dense} onChange={handleChangeDense} />}
-        label="Dense padding"
-      />
     </Box>
   );
 }
