@@ -1,23 +1,18 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Homepage from './views/Home/Home';
-
-import App from './App';
+import { RouterProvider } from 'react-router-dom';
+import Router from './router';
+import { userStore } from './stores/userStore';
+import { Provider } from 'react-redux';
 
 const domNode = document.getElementById('root');
-
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <Homepage />,
-  },
-]);
 
 const root = createRoot(domNode);
 
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <Provider store={userStore}>
+      <RouterProvider router={Router} />
+    </Provider>
   </React.StrictMode>
 );

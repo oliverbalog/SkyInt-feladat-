@@ -1,11 +1,16 @@
 import express from 'express';
+import cors from 'cors';
 //import cors from 'cors';
 import type { AddressInfo } from 'net';
-const app = express();
+import router from './routes.js';
 
-app.get('/', function (req, res) {
-  res.end();
-});
+const app = express();
+app.use(cors());
+app.use(express.json())
+
+router(app);
+
+
 
 // Listen on port 8080
 const listener = app.listen(8080, function () {
